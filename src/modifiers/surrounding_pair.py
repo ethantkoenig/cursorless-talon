@@ -36,8 +36,12 @@ def cursorless_surrounding_pair_scope_type(m) -> str:
         return m.cursorless_selectable_paired_delimiter
 
 
+# "wrap" added to the end of this rule to avoid ambiguity. Since "round" and
+# friends are also used for closing delimiter characters, a command like "change
+# round dot" could be interpreted as "(change round) dot" or "change (round
+# dot)".
 @mod.capture(
-    rule="[{user.cursorless_delimiter_force_direction}] <user.cursorless_surrounding_pair_scope_type>"
+    rule="[{user.cursorless_delimiter_force_direction}] <user.cursorless_surrounding_pair_scope_type> wrap"
 )
 def cursorless_surrounding_pair(m) -> dict[str, Any]:
     """Expand to containing surrounding pair"""
