@@ -16,7 +16,7 @@ class CursorlessCommand:
 
 
 CURSORLESS_COMMAND_ID = "cursorless.command"
-last_phrase = None
+last_phrase: dict = {}
 
 mod = Module()
 
@@ -31,7 +31,7 @@ speech_system.register("pre:phrase", on_phrase)
 
 @mod.action_class
 class Actions:
-    def private_cursorless_command_and_wait(action: dict):
+    def private_cursorless_command_and_wait(action: dict):  # pyright: ignore [reportGeneralTypeIssues]
         """Execute cursorless command and wait for it to finish"""
         response = actions.user.private_cursorless_run_rpc_command_get(
             CURSORLESS_COMMAND_ID,
@@ -40,14 +40,14 @@ class Actions:
         if "fallback" in response:
             perform_fallback(response["fallback"])
 
-    def private_cursorless_command_no_wait(action: dict):
+    def private_cursorless_command_no_wait(action: dict):  # pyright: ignore [reportGeneralTypeIssues]
         """Execute cursorless command without waiting"""
         actions.user.private_cursorless_run_rpc_command_no_wait(
             CURSORLESS_COMMAND_ID,
             construct_cursorless_command(action),
         )
 
-    def private_cursorless_command_get(action: dict):
+    def private_cursorless_command_get(action: dict):  # pyright: ignore [reportGeneralTypeIssues]
         """Execute cursorless command and return result"""
         response = actions.user.private_cursorless_run_rpc_command_get(
             CURSORLESS_COMMAND_ID,
@@ -96,7 +96,11 @@ def make_serializable(value: Any) -> Any:
         return [make_serializable(v) for v in value]
     if dataclasses.is_dataclass(value):
         items = {
-            **{k: v for k, v in value.__class__.__dict__.items() if k[0] != "_"},
+            **{
+                k: v
+                for k, v in vars(type(value)).items()
+                if not k.startswith("_") and not isinstance(v, property)
+            },
             **value.__dict__,
         }
         return {k: make_serializable(v) for k, v in items.items() if v is not None}
